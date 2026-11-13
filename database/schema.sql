@@ -1,3 +1,6 @@
+SET NAMES utf8mb4;
+
+DROP DATABASE IF EXISTS educacao_solidaria;
 CREATE DATABASE IF NOT EXISTS educacao_solidaria
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
