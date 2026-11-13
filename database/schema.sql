@@ -1,0 +1,70 @@
+CREATE DATABASE IF NOT EXISTS educacao_solidaria
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE educacao_solidaria;
+
+CREATE TABLE IF NOT EXISTS usuario (
+  id_usuario INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  senha_hash VARCHAR(255) NOT NULL,
+  perfil ENUM('coordenador', 'voluntario') NOT NULL,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  define_senha BOOLEAN NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (id_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS doador (
+  id_doador INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(150) NOT NULL,
+  cpf VARCHAR(14) NOT NULL UNIQUE,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  telefone VARCHAR(30),
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_doador)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS categoria (
+  id_categoria INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(100) NOT NULL UNIQUE,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (id_categoria)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS item (
+  id_item INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  id_categoria INT UNSIGNED NOT NULL,
+  nome VARCHAR(150) NOT NULL,
+  PRIMARY KEY (id_item),
+  CONSTRAINT fk_item_categoria
+    FOREIGN KEY (id_categoria) REFERENCES categoria (id_categoria)
+    ON UPDATE RESTRICT ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS doacao (
+  id_doacao INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  id_doador INT UNSIGNED NOT NULL,
+  data_doacao DATE NOT NULL,
+  descricao TEXT NOT NULL,
+  PRIMARY KEY (id_doacao),
+  CONSTRAINT fk_doacao_doador
+    FOREIGN KEY (id_doador) REFERENCES doador (id_doador)
+    ON UPDATE RESTRICT ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS doacao_item (
+  id_doacao INT UNSIGNED NOT NULL,
+  id_item INT UNSIGNED NOT NULL,
+  quantidade INT UNSIGNED NOT NULL,
+  PRIMARY KEY (id_doacao, id_item),
+  CONSTRAINT chk_quantidade_positiva CHECK (quantidade >= 1),
+  CONSTRAINT fk_doacao_item_doacao
+    FOREIGN KEY (id_doacao) REFERENCES doacao (id_doacao)
+    ON UPDATE RESTRICT ON DELETE CASCADE,
+  CONSTRAINT fk_doacao_item_item
+    FOREIGN KEY (id_item) REFERENCES item (id_item)
+    ON UPDATE RESTRICT ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
