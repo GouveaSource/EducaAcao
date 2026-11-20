@@ -131,13 +131,13 @@ http://localhost:5173
 
 ## Scripts disponíveis
 
-| Comando | Descrição |
-|---|---|
-| `vp install` | Instala as dependências |
-| `vp dev` | Inicia o frontend em desenvolvimento |
-| `vp run api` | Inicia a API |
-| `vp build` | Gera o build de produção do frontend |
-| `vp preview` | Executa uma prévia do build |
+| Comando      | Descrição                            |
+| ------------ | ------------------------------------ |
+| `vp install` | Instala as dependências              |
+| `vp dev`     | Inicia o frontend em desenvolvimento |
+| `vp run api` | Inicia a API                         |
+| `vp build`   | Gera o build de produção do frontend |
+| `vp preview` | Executa uma prévia do build          |
 
 ## Estrutura do projeto
 
@@ -148,7 +148,15 @@ EducaAcao/
 │   └── seed.sql
 ├── server/
 │   ├── db.js
-│   └── index.js
+│   ├── index.js
+│   ├── route-utils.js
+│   ├── validation.js
+│   └── routes/
+│       ├── doacoes.js
+│       ├── doadores.js
+│       ├── health.js
+│       ├── index.js
+│       └── itens.js
 ├── src/
 ├── .env.example
 ├── .gitignore
