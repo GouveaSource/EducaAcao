@@ -119,4 +119,23 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.patch("/:id/ativar", async (req, res) => {
+  if (!positiveInteger(req.params.id))
+    return res.status(400).json({ error: "Identificador inválido." });
+
+  try {
+    const [existing] = await pool.execute("SELECT id_doador FROM doador WHERE id_doador = ?", [
+      Number(req.params.id),
+    ]);
+    if (existing.length === 0) return res.status(404).json({ error: "Doador não encontrado." });
+
+    await pool.execute("UPDATE doador SET ativo = TRUE WHERE id_doador = ?", [
+      Number(req.params.id),
+    ]);
+    res.json({ id_doador: Number(req.params.id), ativo: true });
+  } catch (error) {
+    handleDatabaseError(error, res);
+  }
+});
+
 export default router;

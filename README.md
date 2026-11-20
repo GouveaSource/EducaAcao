@@ -1,58 +1,57 @@
 # EducaAcao
 
-Sistema de gestão de doações para a ONG EducaAcao.
+Sistema de gerenciamento de doações desenvolvido para uma organização social, com o objetivo de facilitar o cadastro de doadores, categorias, itens e o controle das doações recebidas.
 
-Projeto Integrador Extensionista — Análise e Desenvolvimento de Sistemas (ADS).
+Projeto desenvolvido como parte do **Projeto Integrador Extensionista (PIE II)** do curso de Análise e Desenvolvimento de Sistemas.
 
 ## Tecnologias utilizadas
 
-- **Frontend:** Vite+
-- **Backend:** Node.js e Express
-- **Banco de dados:** MySQL ou MariaDB
-- **Conexão com banco:** mysql2
-- **Variáveis de ambiente:** dotenv
+- **Frontend:** React, Vite+ e Material UI.
+- **Backend:** Node.js e Express.
+- **Banco de dados:** MySQL / MariaDB.
+- **Conexão com o banco:** mysql2.
+- **Variáveis de ambiente:** dotenv.
 
 ## Requisitos
 
-Antes de iniciar, instale:
+Antes de iniciar, é necessário ter instalado:
 
-- [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/)
-- [Vite+](https://viteplus.dev/)
-- MySQL ou MariaDB
+- Git.
+- Node.js.
+- Vite+.
+- MySQL ou MariaDB.
 
-## Como instalar e executar
+## Instalação
 
-### 1. Clonar o repositório
+Clone o repositório:
 
 ```bash
 git clone https://github.com/GouveaSource/EducaAcao.git
 ```
 
-### 2. Entrar na pasta do projeto
+Acesse a pasta do projeto:
 
 ```bash
 cd EducaAcao
 ```
 
-### 3. Instalar as dependências
+Instale as dependências:
 
 ```bash
 vp install
 ```
 
-### 4. Configurar as variáveis de ambiente
-
-Copie o arquivo de exemplo:
+Crie o arquivo de configuração a partir do exemplo:
 
 ```bash
 cp .env.example .env
 ```
 
-Edite o arquivo `.env` com as configurações do seu ambiente:
+Configure as informações de conexão com o banco de dados no arquivo `.env`:
 
 ```env
 PORT=3000
+
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=educacao
@@ -60,33 +59,35 @@ DB_PASSWORD=sua_senha
 DB_NAME=educacao_solidaria
 ```
 
-Ajuste os valores conforme a configuração do seu banco de dados.
+Ajuste os valores conforme a configuração do seu ambiente.
 
-**Importante:** o arquivo `.env` contém informações locais e não deve ser enviado ao repositório.
+**Importante:** o arquivo `.env` contém informações de conexão e não deve ser compartilhado ou enviado ao repositório.
 
-### 5. Configurar o banco de dados
+## Banco de dados
 
-Os arquivos SQL estão disponíveis na pasta `database/`.
+O projeto utiliza o banco de dados `educacao_solidaria`.
 
-Primeiro, execute o esquema para criar o banco e as tabelas:
+Para criar a estrutura do banco, execute:
 
 ```bash
 mysql -u root -p < database/schema.sql
 ```
 
-Opcionalmente, carregue os dados fictícios para testes:
+Para inserir os dados fictícios utilizados como exemplo:
 
 ```bash
 mysql -u root -p < database/seed.sql
 ```
 
-O banco utilizado pelo projeto é `educacao_solidaria`.
+O banco deve estar em execução e o usuário configurado precisa ter as permissões necessárias.
 
-O usuário e a senha utilizados na execução da aplicação devem ter permissão de acesso a esse banco.
+**Atenção:** o arquivo `schema.sql` recria o banco de dados e contém um comando de exclusão da base existente. Sua execução apaga os dados anteriores. Utilize-o somente na instalação inicial ou em um ambiente de testes.
 
-### 6. Iniciar a API
+## Executando o projeto
 
-Em um terminal, execute:
+O frontend e o backend devem ser executados em terminais separados.
+
+**1. Iniciar a API:**
 
 ```bash
 vp run api
@@ -94,30 +95,15 @@ vp run api
 
 A API ficará disponível em:
 
-```text
-http://localhost:3000
-```
+`http://localhost:3000`
 
-Para verificar se a API e o banco estão funcionando, acesse:
+Para verificar a conexão com o banco de dados, acesse:
 
-```text
-http://localhost:3000/api/health
-```
+`http://localhost:3000/api/health`
 
-A resposta esperada é semelhante a:
+**2. Iniciar o frontend:**
 
-```json
-{
-  "status": "ok",
-  "app": "EducaAcao",
-  "hora": "2026-11-13T03:00:00.000Z",
-  "database": "connected"
-}
-```
-
-### 7. Iniciar o frontend
-
-Em outro terminal, na pasta do projeto, execute:
+Em outro terminal, execute:
 
 ```bash
 vp dev
@@ -125,63 +111,45 @@ vp dev
 
 O frontend ficará disponível em:
 
-```text
-http://localhost:5173
-```
+`http://localhost:5173`
 
-## Scripts disponíveis
+## Funcionalidades
 
-| Comando      | Descrição                            |
-| ------------ | ------------------------------------ |
-| `vp install` | Instala as dependências              |
-| `vp dev`     | Inicia o frontend em desenvolvimento |
-| `vp run api` | Inicia a API                         |
-| `vp build`   | Gera o build de produção do frontend |
-| `vp preview` | Executa uma prévia do build          |
+O sistema possui as seguintes funcionalidades:
+
+- Cadastro, consulta, edição e inativação de doadores.
+- Cadastro, consulta, edição e gerenciamento de categorias.
+- Cadastro, consulta, edição e gerenciamento de itens.
+- Associação de itens às respectivas categorias.
+- Registro de doações vinculadas aos doadores.
+- Associação de vários itens e suas quantidades a uma mesma doação.
+- Preservação do histórico de registros por meio de inativação, quando aplicável.
 
 ## Estrutura do projeto
 
 ```text
 EducaAcao/
 ├── database/
+│   ├── migrations/
 │   ├── schema.sql
 │   └── seed.sql
 ├── server/
+│   ├── routes/
 │   ├── db.js
 │   ├── index.js
-│   ├── route-utils.js
-│   ├── validation.js
-│   └── routes/
-│       ├── doacoes.js
-│       ├── doadores.js
-│       ├── health.js
-│       ├── index.js
-│       └── itens.js
+│   └── validation.js
 ├── src/
+│   ├── components/
+│   ├── pages/
+│   └── ...
 ├── .env.example
-├── .gitignore
 ├── package.json
-├── package-lock.json
 └── README.md
 ```
 
-## Comportamento de exclusão
-
-A rota `DELETE /api/doadores/:id` realiza uma exclusão lógica.
-
-Nesse processo, o campo `ativo` do doador é definido como `FALSE`. O registro permanece armazenado no banco de dados, assim como seu histórico de doações.
-
-Essa abordagem evita a perda de informações históricas e mantém a integridade dos relacionamentos.
-
-## Autenticação
-
-A autenticação ainda não está implementada nesta etapa do projeto.
-
-Os usuários cadastrados no arquivo `seed.sql` são dados fictícios destinados a uma futura implementação. Atualmente, não existem rotas protegidas por autenticação.
-
 ## Observações
 
-- Os dados presentes no arquivo `seed.sql` são fictícios e destinados exclusivamente a testes.
-- O banco de dados deve estar em execução antes de iniciar a API.
-- A API e o frontend devem ser iniciados em terminais separados.
-- As configurações locais devem ser feitas no arquivo `.env`, sem modificar ou compartilhar credenciais reais no repositório.
+- Os dados disponibilizados no arquivo `seed.sql` são fictícios e utilizados para demonstração e testes.
+- O banco de dados precisa estar em execução para que a API funcione corretamente.
+- A API e o frontend são executados separadamente.
+- A autenticação de usuários ainda não foi implementada no sistema.

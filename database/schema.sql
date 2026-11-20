@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS item (
   id_item INT UNSIGNED NOT NULL AUTO_INCREMENT,
   id_categoria INT UNSIGNED NOT NULL,
   nome VARCHAR(150) NOT NULL,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
   PRIMARY KEY (id_item),
   CONSTRAINT fk_item_categoria
     FOREIGN KEY (id_categoria) REFERENCES categoria (id_categoria)

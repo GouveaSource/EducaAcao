@@ -4,9 +4,7 @@ const requiredEnv = ["DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME"];
 const missingEnv = requiredEnv.filter((name) => !process.env[name]?.trim());
 
 if (missingEnv.length > 0) {
-  throw new Error(
-    `Missing required database environment variable(s): ${missingEnv.join(", ")}`,
-  );
+  throw new Error(`Missing required database environment variable(s): ${missingEnv.join(", ")}`);
 }
 
 const dbPort = Number(process.env.DB_PORT);

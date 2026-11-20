@@ -1,7 +1,7 @@
 import { Router } from "express";
 import pool from "../db.js";
 import { handleDatabaseError } from "../route-utils.js";
-import { validateDonationInput } from "../validation.js";
+import { positiveInteger, validateDonationInput } from "../validation.js";
 
 const router = Router();
 
@@ -43,6 +43,58 @@ router.get("/", async (req, res) => {
       }
     }
     res.json([...doacoes.values()]);
+  } catch (error) {
+    handleDatabaseError(error, res);
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  if (!positiveInteger(req.params.id)) {
+    return res.status(400).json({ error: "Identificador de doação inválido." });
+  }
+
+  try {
+    const [rows] = await pool.execute(
+      `
+      SELECT d.id_doacao, d.data_doacao, d.descricao,
+             doa.id_doador, doa.nome AS nome_doador,
+             i.id_item, i.nome AS nome_item, c.nome AS categoria,
+             di.quantidade
+      FROM doacao d
+      JOIN doador doa ON doa.id_doador = d.id_doador
+      LEFT JOIN doacao_item di ON di.id_doacao = d.id_doacao
+      LEFT JOIN item i ON i.id_item = di.id_item
+      LEFT JOIN categoria c ON c.id_categoria = i.id_categoria
+      WHERE d.id_doacao = ?
+      ORDER BY i.nome
+    `,
+      [Number(req.params.id)],
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Doação não encontrada." });
+    }
+
+    const primeiraLinha = rows[0];
+    const doacao = {
+      id_doacao: primeiraLinha.id_doacao,
+      id_doador: primeiraLinha.id_doador,
+      nome_doador: primeiraLinha.nome_doador,
+      data_doacao: primeiraLinha.data_doacao,
+      descricao: primeiraLinha.descricao,
+      itens: [],
+    };
+    for (const row of rows) {
+      if (row.id_item) {
+        doacao.itens.push({
+          id_item: row.id_item,
+          nome: row.nome_item,
+          categoria: row.categoria,
+          quantidade: row.quantidade,
+        });
+      }
+    }
+    res.json(doacao);
   } catch (error) {
     handleDatabaseError(error, res);
   }
@@ -90,6 +142,76 @@ router.post("/", async (req, res) => {
     }
     await connection.commit();
     res.status(201).json({ id_doacao: result.insertId });
+  } catch (error) {
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (rollbackError) {
+        console.error("Falha ao desfazer transação:", rollbackError);
+      }
+    }
+    handleDatabaseError(error, res);
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+router.put("/:id", async (req, res) => {
+  if (!positiveInteger(req.params.id)) {
+    return res.status(400).json({ error: "Identificador de doação inválido." });
+  }
+  const { id_doador, data_doacao, descricao, itens } = req.body ?? {};
+  const validationError = validateDonationInput({ id_doador, data_doacao, descricao, itens });
+  if (validationError) return res.status(400).json({ error: validationError });
+
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    const [doacoes] = await connection.execute("SELECT id_doacao FROM doacao WHERE id_doacao = ?", [
+      Number(req.params.id),
+    ]);
+    if (doacoes.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ error: "Doação não encontrada." });
+    }
+
+    const [doadores] = await connection.execute(
+      "SELECT id_doador FROM doador WHERE id_doador = ?",
+      [Number(id_doador)],
+    );
+    if (doadores.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ error: "Doador não encontrado." });
+    }
+
+    for (const item of itens) {
+      const [existingItems] = await connection.execute(
+        "SELECT id_item FROM item WHERE id_item = ?",
+        [Number(item.id_item)],
+      );
+      if (existingItems.length === 0) {
+        await connection.rollback();
+        return res.status(400).json({ error: "Existe um item inválido na doação." });
+      }
+    }
+
+    await connection.execute(
+      "UPDATE doacao SET id_doador = ?, data_doacao = ?, descricao = ? WHERE id_doacao = ?",
+      [Number(id_doador), data_doacao, descricao.trim(), Number(req.params.id)],
+    );
+    await connection.execute("DELETE FROM doacao_item WHERE id_doacao = ?", [
+      Number(req.params.id),
+    ]);
+    for (const item of itens) {
+      await connection.execute(
+        "INSERT INTO doacao_item (id_doacao, id_item, quantidade) VALUES (?, ?, ?)",
+        [Number(req.params.id), Number(item.id_item), Number(item.quantidade)],
+      );
+    }
+    await connection.commit();
+    res.json({ id_doacao: Number(req.params.id) });
   } catch (error) {
     if (connection) {
       try {
